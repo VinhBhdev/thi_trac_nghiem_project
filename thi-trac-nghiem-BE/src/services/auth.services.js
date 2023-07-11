@@ -67,8 +67,15 @@ let findUserById = async (id) => {
     if (findUser) return findUser;
     else throw new Error('User chưa loggin');
 }
+
+let getAllUsers = async () => {
+    let users = await User.findAll();
+    users = users.map(item => item.dataValues);
+    return users;
+}
 module.exports = {
     signinServices,
     signupServices,
     findUserById,
+    getAllUsers,
 }

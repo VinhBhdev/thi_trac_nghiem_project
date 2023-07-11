@@ -3,6 +3,8 @@ import AnswerModel from '../models/Answer.models'
 import ResultQuestionModel from '../models/ResultQuestion.models'
 import SubjectModel from '../models/Subject.models'
 import ContestModel from '../models/Contest.models'
+import ParticipationsModel from '../models/Participations.models'
+import UserModel from '../models/User'
 import ContestQuestionModel from '../models/ContestQuestion.models'
 let addQAServices = async (QAData) => {
     const questionData = await QuestionModel.create({
@@ -63,6 +65,12 @@ let addContestServices = async (contest) => {
             contest_id: contestId,
             question_id: questionId,
         });
+    }
+    for (let userId of contest.usersEnterContest) {
+        await ParticipationsModel.create({
+            user_id: userId,
+            contest_id: contestId,
+        })
     }
     return {
         message: "add contest successfully",
@@ -125,10 +133,36 @@ let getAllQuestionsBySubjectIdServices = async (subjectId) => {
     // console.log(questionsList);
     return questionsList;
 }
+
+let getAllUsersServices = async (role = 1) => {
+    let users = await UserModel.findAll({
+        attributes: ['id', 'username', 'first_name', 'last_name', 'email', 'class'],
+        where: {
+            role,
+        }
+    })
+    return users;
+}
+
+let getAllContests = async (subjectId) => {
+    let contests = await ContestModel.findAll({
+        where: {
+            subject_id: subjectId,
+        }
+    }
+    );
+    contests = contests.map(item => item.dataValues);
+    contests.sort((a, b) => {
+        return b.id - a.id;
+    })
+    return contests;
+}
 module.exports = {
     addQAServices,
     addSubjectServices,
     addContestServices,
     updateSubjectServices,
     getAllQuestionsBySubjectIdServices,
+    getAllUsersServices,
+    getAllContests,
 }

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 import sequelize from "../configs/connection_database";
 
-const EnterContestModel = sequelize.define('enterContestModel', {
+const AssignmentQustionsModel = sequelize.define('assignmentQustionsModel', {
     // Model attributes are defined here
     id: {
         type: DataTypes.INTEGER,
@@ -9,34 +9,29 @@ const EnterContestModel = sequelize.define('enterContestModel', {
         autoIncrement: true,
         primaryKey: true
     },
-    participation_id: {
+    enter_contest_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'participations', // 'fathers' refers to table name
+            model: 'enter_contest', // 'fathers' refers to table name
             key: 'id', // 'id' refers to column name in fathers table
         }
     },
-
-    start_time: {
-        type: DataTypes.DATE,
+    question_id: {
+        type: DataTypes.INTEGER,
         allowNull: true,
+        references: {
+            model: 'questions', // 'fathers' refers to table name
+            key: 'id', // 'id' refers to column name in fathers table
+        }
     },
-    end_time: {
-        type: DataTypes.DATE,
+    is_correct: {
+        type: DataTypes.STRING,
         allowNull: true,
-    },
-    submit_time: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-    point: {
-        type: DataTypes.DOUBLE,
-        allowNull: true,
-    },
+    }
 
 }, {
-    tableName: 'enter_contest'
+    tableName: 'assignment_questions'
 });
 
 /**
@@ -45,4 +40,4 @@ const EnterContestModel = sequelize.define('enterContestModel', {
     .sync()
 
  */
-module.exports = EnterContestModel;
+module.exports = AssignmentQustionsModel;

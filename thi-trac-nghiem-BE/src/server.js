@@ -4,7 +4,10 @@ import initWebRoute from './routes/web'
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import sequelize from './configs/connection_database';
-import ResultQuestionModel from './models/EnterContestDetail.models'
+import ResultQuestionModel from './models/AssignmentAnswers.models'
+
+const fileUpload = require('express-fileupload');
+
 const app = express();
 
 require('dotenv').config();
@@ -16,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(cors({ origin: true }))
+
+app.use(fileUpload());
 
 configViewEngine(app);
 initWebRoute(app);
