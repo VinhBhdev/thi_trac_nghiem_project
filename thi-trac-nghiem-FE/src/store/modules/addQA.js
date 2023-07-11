@@ -1,4 +1,4 @@
-import { addQAApi } from "@/apis/addQA";
+import { addQAApi, uploadWordFileApi } from "@/apis/addQA";
 const state = () => {
     return {
         subjectId: 1,
@@ -65,6 +65,15 @@ const actions = {
     },
     addQAAction(context, data) {
         addQAApi(data)
+    },
+    async uploadWordFileAction(context, form) {
+        try {
+            const result = await uploadWordFileApi(form);
+            return result.data;
+        }
+        catch (error) {
+            return error.response.data.message;
+        }
     }
 }
 

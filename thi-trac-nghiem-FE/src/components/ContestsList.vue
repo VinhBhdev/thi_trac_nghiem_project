@@ -14,6 +14,7 @@
 import ContestItem from "./ContestItem.vue";
 import { createNamespacedHelpers } from "vuex";
 const { mapGetters, mapActions } = createNamespacedHelpers("contest");
+const authStore = createNamespacedHelpers("auth");
 export default {
   components: {
     ContestItem,
@@ -27,17 +28,31 @@ export default {
     ...mapGetters({
       contestsList: "getAllContestsSearch",
     }),
+    ...authStore.mapState({
+      userId: (state) => state.user?.id,
+    }),
   },
   methods: {
     ...mapActions({
       getAllContestsAction: "getAllContestsAction",
     }),
+    ...authStore.mapActions({
+      checkUserLoggedAction: "checkUserLoggedAction",
+    }),
     handleStartTest(course) {
       console.log(course);
     },
   },
-  created() {
-    this.getAllContestsAction(this.$route.params.subjectId);
+  async created() {
+    const token = this.$cookies.get("token");
+    if (token) {
+      await this.checkUserLoggedAction(token);
+    }
+    console.log(this.userId);
+    this.getAllContestsAction({
+      userId: this.userId,
+      subjectId: this.$route.params.subjectId,
+    });
     setTimeout(() => {
       console.log(this.contestsList);
     }, 2500);

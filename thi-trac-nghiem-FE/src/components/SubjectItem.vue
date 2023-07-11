@@ -14,17 +14,44 @@
 </template>
 
 <script>
+import { createNamespacedHelpers } from "vuex";
+const authStore = createNamespacedHelpers("auth");
 export default {
   props: {
     subjectItem: {
       type: Object,
     },
   },
-
+  computed: {
+    ...authStore.mapState({
+      user: (state) => state.user,
+    }),
+  },
   methods: {
     handleClickBtn() {
-      this.$router.push("/subjects/" + this.subjectItem.id);
+      console.log(this.user);
+      if (this.user.role === 1)
+        this.$router.push("/subjects/" + this.subjectItem.id);
+      else
+        this.$router.push(
+          "/admin/all-contests-for-admin/subjects/" + this.subjectItem.id
+        );
     },
+
+    ...authStore.mapActions({
+      checkUserLoggedAction: "checkUserLoggedAction",
+    }),
+    getUserToken() {
+      const token = this.$cookies.get("token");
+      return token;
+    },
+  },
+
+  async created() {
+    const token = this.getUserToken();
+    if (token) {
+      await this.checkUserLoggedAction(token);
+    }
   },
 };
 </script>

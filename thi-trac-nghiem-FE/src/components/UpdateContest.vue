@@ -168,12 +168,18 @@
           </li>
           <div v-for="(page, index) in numberOfPages" :key="index">
             <li v-if="+page === currentPage" class="page-item active">
-              <div class="page-link" @click="handleChangePage(page)">
+              <div
+                class="page-link"
+                @click="handleChangeRecommendQuestions(contest.subjectId, page)"
+              >
                 {{ page }}
               </div>
             </li>
             <li v-else class="page-item">
-              <div class="page-link" @click="handleChangePage(page)">
+              <div
+                class="page-link"
+                @click="handleChangeRecommendQuestions(contest.subjectId, page)"
+              >
                 {{ page }}
               </div>
             </li>
@@ -247,7 +253,7 @@
 <script>
 import { createNamespacedHelpers } from "vuex";
 const subjectsStore = createNamespacedHelpers("subjects");
-// const contestStore = createNamespacedHelpers("contest");
+const contestStore = createNamespacedHelpers("contest");
 const addContestStore = createNamespacedHelpers("addContest");
 // const questionsStore = createNamespacedHelpers("questions");
 
@@ -284,6 +290,9 @@ export default {
     }),
   },
   methods: {
+    ...contestStore.mapActions({
+      getContestDetailAction: "getContestDetailAction",
+    }),
     async handleCheckValidateUsernames() {
       let usernames = this.usernamesTextArea.split("\n");
       let validateData = await this.validateUsersAction({
@@ -324,7 +333,6 @@ export default {
       this.recommendQuestionsForContest =
         this.getRecommendQuestionsListByTopicSearch;
     },
-    handleChangePage() {},
     handleNextPage() {
       if (this.currentPage < this.numberOfPages) {
         this.handleChangeRecommendQuestions(
@@ -364,6 +372,13 @@ export default {
     },
   },
   async created() {
+    let contestId = this.$route.params.contestId;
+    this.contest = await this.getContestDetailAction(contestId);
+    this.handleChangeRecommendQuestions(this.contest.subjectId, 1);
+    this.usersList = this.contest.usersList;
+    this.usernamesTextArea = this.usersList
+      .map((item) => item.username)
+      .join("\n");
     await this.getAllSubjectsAction();
     // this.usersList = await this.getAllUsersAction();
     console.log(this.usersList);

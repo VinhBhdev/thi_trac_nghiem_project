@@ -137,10 +137,10 @@ export default {
       return token;
     },
   },
-  created() {
+  async created() {
     const token = this.getUserToken();
     if (token) {
-      this.checkUserLoggedAction(token);
+      await this.checkUserLoggedAction(token);
     }
   },
 };

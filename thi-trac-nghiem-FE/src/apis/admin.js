@@ -27,10 +27,41 @@ export const updateSubjectApi = async (updateSubject) => {
 
 };
 
-export const getAllQuestionsBySubjectIdApi = async (subjectId) => {
+export const getAllQuestionsBySubjectIdApi = async (subjectId, page, search) => {
     let result = await axios({
         method: "GET",
-        url: `http://localhost:3000/api/v1/admin/get-questions-by-subject-id/${subjectId}`,
+        url: `http://localhost:3000/api/v1/admin/get-questions-by-subject-id/${subjectId}?page=${page}&search=${search || ""}`,
     });
     return result;
 };
+
+export const getAllUsersApi = async (role) => {
+    let result = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/v1/admin/get-all-users`,
+        data: role,
+    });
+    return result;
+};
+
+export const validateUsersApi = async (usernames) => {
+    let result = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/v1/admin/validate-users`,
+        data: usernames,
+    });
+    return result;
+};
+
+export const getAllContestsForAdminApi = async (subjectId) => {
+    console.log(">>>api");
+    console.log(subjectId);
+    let result = await axios({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/admin/all-contests/subjects/${subjectId}`,
+    });
+    console.log(">>>api");
+    console.log(result);
+    return result;
+};
+

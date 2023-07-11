@@ -11,3 +11,12 @@ export const addQAApi = async (QA) => {
     })
 
 };
+
+export const uploadWordFileApi = async (form) => {
+    return await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/v1/admin/upload/${form.subjectId}`,
+        data: form.formData,
+    })
+
+};

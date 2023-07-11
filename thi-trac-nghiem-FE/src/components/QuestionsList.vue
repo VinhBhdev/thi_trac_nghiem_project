@@ -28,6 +28,48 @@
         </div>
       </div>
     </div>
+
+    <div :class="resultModalClass">
+      <div class="result-contest-container">
+        <div class="result-contest__header">
+          <h3>KẾT QUẢ CONTEST</h3>
+        </div>
+        <div class="result-contest__body">
+          <h4>
+            Trả lời đúng: {{ userResult.numberOfRightAnswers }}/
+            {{ questionsArray.length }}
+          </h4>
+          <div class="result-table">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 10%">STT</th>
+                  <th scope="col" style="width: 80%">Câu hỏi</th>
+                  <th scope="col">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(item, index) in userResult.resultDetail"
+                  class=""
+                  :key="index"
+                >
+                  <th scope="row">{{ item.questionNumber }}</th>
+                  <td>{{ item.question.questionText }}</td>
+                  <td v-if="item.status === 'AC'" class="alert-success">
+                    {{ item.status }}
+                  </td>
+                  <td v-else class="alert-danger">{{ item.status }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="home-page-link">
+          <a href="/">Trở về trang chủ</a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -36,9 +78,19 @@ import TheBoard from "./TheBoard.vue";
 import TheQuestion from "./TheQuestion.vue";
 import { createNamespacedHelpers } from "vuex";
 const questionsStore = createNamespacedHelpers("questions");
-const { mapGetters, mapActions } = createNamespacedHelpers("contest");
-
+const contestStore = createNamespacedHelpers("contest");
+const authStore = createNamespacedHelpers("auth");
 export default {
+  data() {
+    return {
+      userResult: "",
+      resultModalClass: {
+        "result-contest-modal": true,
+        modal: true,
+        open: false,
+      },
+    };
+  },
   components: {
     TheQuestion,
     TheBoard,
@@ -48,39 +100,62 @@ export default {
       questionsArray: (state) => state.questionsArray,
       answered: (state) => state.answered,
     }),
-    ...mapGetters({
+    ...contestStore.mapGetters({
       endContest: "getEndContest",
+    }),
+    ...authStore.mapState({
+      userId: (state) => state.user.id,
     }),
   },
   methods: {
     async handleSubmit() {
       console.log(this.answered);
-      await this.submitContestAction({
-        contestId: this.$route.params.contestId,
+      this.userResult = await this.submitContestAction({
+        enterContestId: this.$route.params.enterContestId,
         userAssignment: this.answered,
       });
+      console.log(this.userResult);
+      this.resultModalClass.open = true;
     },
-    ...mapActions({
+    ...contestStore.mapActions({
       setEndContestAction: "setEndContestAction",
       submitContestAction: "submitContestAction",
+      getEndTimeOfContestAction: "getEndTimeOfContestAction",
     }),
     ...questionsStore.mapActions({
-      getAllQuestionsByContestIdAction: "getAllQuestionsByContestIdAction",
+      getAllQuestionsByEnterContestIdAction:
+        "getAllQuestionsByEnterContestIdAction",
       clearStateInfo: "clearStateInfo",
     }),
+    handleEndContest() {
+      this.$router.push("/");
+    },
   },
   async created() {
     // get all questions by contest id (api)
     this.clearStateInfo();
-    await this.getAllQuestionsByContestIdAction(this.$route.params.contestId);
+    console.log("--------------------begin--------------");
+    console.log(">>>getAllQuestionsByContestIdAction");
+    console.log(this.$route.params.enterContestId);
+    await this.getAllQuestionsByEnterContestIdAction(
+      this.$route.params.enterContestId
+    );
 
     // count dowm
-    if (!this.endContest) {
-      let end = new Date(new Date().valueOf() + 90 * 60 * 1000);
-      console.log(end.toUTCString());
-      this.setEndContestAction(end);
 
-      let distance = this.endContest - new Date();
+    let end = await this.getEndTimeOfContestAction({
+      enterContestId: this.$route.params.enterContestId,
+    });
+    end = new Date(end.endTime);
+    console.log(">>>end");
+    console.log(end);
+    console.log(">>>enterContestId");
+    console.log(this.$route.params.enterContestId);
+    this.setEndContestAction(end);
+
+    let distance = this.endContest - new Date();
+    if (distance < 0) this.handleEndContest();
+    else {
       let x = setInterval(function () {
         let days = Math.floor(distance / (1000 * 60 * 60 * 24));
         let hours = Math.floor(
@@ -95,7 +170,8 @@ export default {
 
         if (distance < 0) {
           clearInterval(x);
-          document.querySelector(".count-down").innerHTML = "OK";
+          document.querySelector(".count-down").innerHTML = "Hết giờ !";
+          setTimeout(this.handleEndContest, 2000);
         }
         distance -= 1000;
       }, 1000);
@@ -106,7 +182,7 @@ export default {
 
 
 
-<style>
+<style scopted>
 label {
   margin-left: 8px;
 }
@@ -117,5 +193,46 @@ label {
 }
 html {
   scroll-behavior: smooth;
+}
+
+.result-contest-modal {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: FaceTopDown ease 0.5s;
+}
+
+@keyframes FaceTopDown {
+  from {
+    opacity: 0;
+    transform: translateY(-500px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-contest-container {
+  background-color: #ffffff;
+  width: 80%;
+  min-height: 500px;
+  padding: 30px;
+}
+.modal.open {
+  display: flex;
+}
+
+.home-page-link {
+  text-decoration: underline;
+  color: blue;
+  font-size: 14px;
+  text-align: left;
 }
 </style>

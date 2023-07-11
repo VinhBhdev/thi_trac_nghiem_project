@@ -1,4 +1,4 @@
-import { getAllQuestionsByContestIdApi } from "@/apis/questions";
+import { getAllQuestionsByEnterContestIdApi } from "@/apis/questions";
 import { getAllQuestionsBySubjectIdApi } from "@/apis/admin"
 // import { getAllUserApi, createUserApi, removeUserApi, editUserApi } from "@/apis/users";
 
@@ -44,11 +44,11 @@ const actions = {
     addAnswerAction(context, obj) {
         context.commit("addAnswerMutation", obj)
     },
-    async getAllQuestionsByContestIdAction(context, contestId) {
+    async getAllQuestionsByEnterContestIdAction(context, enterContestId) {
         try {
             console.log(">>>action");
-            console.log(contestId);
-            let result = await getAllQuestionsByContestIdApi(contestId);
+            console.log(enterContestId);
+            let result = await getAllQuestionsByEnterContestIdApi(enterContestId);
             context.commit("setQuestionsArrayMutation", result.data);
             console.log(result.data);
         } catch (error) {

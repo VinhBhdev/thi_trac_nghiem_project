@@ -1,58 +1,29 @@
 
-import { addContestApi } from "@/apis/admin";
+import { addContestApi, getAllQuestionsBySubjectIdApi, getAllUsersApi, validateUsersApi } from "@/apis/admin";
 const state = () => {
     return {
         contest: {},
         recommendQuestionsList: [],
-        searchRecommendQuestionsText: '',
-        searchTopic: '',
+        PAGE_SIZE: 1,
+        numberOfPages: 1,
         currentPage: 1,
-        NUMBER_OF_QUESTIONS_PER_PAGE: 5
     }
 }
-function pagination(result, page, NUMBER_OF_QUESTIONS_PER_PAGE) {
-    return result.slice((page - 1) * NUMBER_OF_QUESTIONS_PER_PAGE, page * NUMBER_OF_QUESTIONS_PER_PAGE);
-}
+
 const getters = {
-    getRecommendQuestions(state) {
-        return pagination(state.recommendQuestionsList, state.currentPage, state.NUMBER_OF_QUESTIONS_PER_PAGE);
-    },
-    getNumberOfPages(state) {
-        return parseInt((state.recommendQuestionsList.length + state.NUMBER_OF_QUESTIONS_PER_PAGE - 1) / state.NUMBER_OF_QUESTIONS_PER_PAGE);
-    },
-    getRecommendQuestionsListBySearchText(state) {
-        let filterQuestions = state.recommendQuestionsList.filter((item) => {
-            console.log(item.topic);
-            return item.topic.includes(state.searchRecommendQuestionsText) || item.questionText.includes(state.searchRecommendQuestionsText);
-        });
-        return filterQuestions;
-    },
-    getRecommendQuestionsListByTopicSearch(state) {
-        let filterQuestions = state.recommendQuestionsList.filter((item) => {
-            console.log(item.topic);
-            return item.topic === state.searchTopic;
-        });
-        return filterQuestions;
-    },
-    getAllTopics(state) {
-        let topicsList = state.recommendQuestionsList.reduce((res, item) => {
-            if (res.indexOf(item.topic) === -1) res.push(item.topic);
-            return res;
-        }, []);
-        return topicsList;
-    }
+
 }
 const mutations = {
-    setRecommendQuestionsListMutaion(state, recommendQuestionsList) {
-        state.recommendQuestionsList = recommendQuestionsList;
+    setPageSizeMutation(state, PAGE_SIZE) {
+        state.PAGE_SIZE = PAGE_SIZE;
     },
-    setSearchTextMutation(state, searchRecommendQuestionsText) {
-        state.searchRecommendQuestionsText = searchRecommendQuestionsText;
+    setNumberOfPagesMutatation(state, numberOfPages) {
+        state.numberOfPages = numberOfPages;
     },
-    setSearchTopicTextMutation(state, searchTopic) {
-        state.searchTopic = searchTopic;
+    setRecommendQuestionsListMutatation(state, questions) {
+        state.recommendQuestionsList = questions;
     },
-    setCurrentPageMutation(state, page) {
+    setCurrentPageMutatation(state, page) {
         state.currentPage = page;
     }
 }
@@ -65,17 +36,37 @@ const actions = {
             return error.response.data.message;
         }
     },
-    setRecommendQuestionsListAction(context, recommendQuestionsList) {
-        context.commit("setRecommendQuestionsListMutaion", recommendQuestionsList);
+    async getQuestionsBySubjectIdAction(context, info) {
+        let { subjectId, page, search } = info;
+        page = page || 1;
+        console.log(subjectId, page);
+        try {
+            const result = await getAllQuestionsBySubjectIdApi(subjectId, page || 1, search || "");
+            console.log(result);
+            context.commit("setNumberOfPagesMutatation", result.data.numberOfPages);
+            context.commit("setPageSizeMutation", result.data.PAGE_SIZE);
+            context.commit("setRecommendQuestionsListMutatation", result.data.questionsList);
+            context.commit("setCurrentPageMutatation", page);
+            return result.data.questionsList;
+        } catch (error) {
+            return error.response.data.message;
+        }
     },
-    setSearchTextAction(context, searchText) {
-        context.commit("setSearchTextMutation", searchText);
+    async getAllUsersAction(context, role = 1) {
+        try {
+            const users = await getAllUsersApi(role);
+            return users.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
     },
-    setSearchTopicTextAction(context, searchTopic) {
-        context.commit("setSearchTopicTextMutation", searchTopic);
-    },
-    setCurrentPageAction(context, page) {
-        context.commit("setCurrentPageMutation", page);
+    async validateUsersAction(context, usernames) {
+        try {
+            const users = await validateUsersApi(usernames);
+            return users.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
     }
 }
 export default {

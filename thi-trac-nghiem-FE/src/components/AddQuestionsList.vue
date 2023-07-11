@@ -7,12 +7,22 @@
       </div>
       <select class="custom-select" id="inputGroupSelect01" v-model="subjectId">
         <option selected>-- Chọn môn học --</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
+        <option
+          v-for="(subject, index) in subjectsList"
+          :key="index"
+          :value="subject.id"
+        >
+          {{ subject.subjectName }}
+        </option>
       </select>
     </div>
     <form @submit.prevent="handleAddQuestion">
+      <form id="uploadForm">
+        <input type="file" id="myFiles" accept=".docx" multiple />
+        <button>Submit</button>
+      </form>
+      <h4 id="upload-file-status"></h4>
+      <h5 id="upload-file-message"></h5>
       <div class="form-group add-form">
         <label for="">Chủ đề</label>
         <input
@@ -59,6 +69,7 @@ import AddAnAnswer from "./AddAnAnswer.vue";
 import { createNamespacedHelpers } from "vuex";
 const { mapGetters, mapActions } = createNamespacedHelpers("auth");
 const addQAStore = createNamespacedHelpers("addQA");
+const subjectsStore = createNamespacedHelpers("subjects");
 
 export default {
   components: {
@@ -81,8 +92,14 @@ export default {
     ...addQAStore.mapGetters({
       QA: "getQA",
     }),
+    ...subjectsStore.mapState({
+      subjectsList: (state) => state.subjectsList,
+    }),
   },
   methods: {
+    ...subjectsStore.mapActions({
+      getAllSubjectsAction: "getAllSubjectsAction",
+    }),
     handleDecreaseAnswers() {
       if (this.numberOfAnswers === 1) return;
       this.numberOfAnswers--;
@@ -112,6 +129,7 @@ export default {
       addSubjectIdAction: "addSubjectIdAction",
       addQAAction: "addQAAction",
       addTopicAction: "addTopicAction",
+      uploadWordFileAction: "uploadWordFileAction",
     }),
     getUserToken() {
       const token = this.$cookies.get("token");
@@ -126,6 +144,48 @@ export default {
       console.log(this.user);
       if (this.user.role != "2") this.$router.push("error-page");
     }
+    await this.getAllSubjectsAction();
+  },
+
+  async mounted() {
+    const form = document.querySelector("#uploadForm");
+
+    const sendFiles = async () => {
+      // Object
+      const myFiles = document.getElementById("myFiles").files;
+
+      const formData = new FormData();
+
+      Object.keys(myFiles).forEach((key) => {
+        formData.append(myFiles.item(key).name, myFiles.item(key));
+      });
+
+      // const response = await fetch(
+      //   `http://localhost:3000/api/v1/admin/upload/${this.subjectId}`,
+      //   {
+      //     method: "POST",
+      //     body: formData,
+      //   }
+      // );
+
+      // const json = await response.json();
+      let json = await this.uploadWordFileAction({
+        subjectId: this.subjectId,
+        formData: formData,
+      });
+      const statusElement = document.querySelector("#upload-file-status");
+      statusElement.textContent = `Status: ${json?.status}`;
+
+      const messageElement = document.querySelector("#upload-file-message");
+      messageElement.textContent = json?.message;
+
+      console.log(json);
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendFiles();
+    });
   },
 };
 </script>

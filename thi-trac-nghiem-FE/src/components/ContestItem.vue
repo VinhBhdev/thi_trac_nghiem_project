@@ -17,31 +17,78 @@
           /> -->
           <b>Thời gian làm bài: {{ contestItem.contestTime }}ph</b>
         </div>
-        <div class="f2">
+        <div class="" style="flex: 4">
           <div :class="{ 'count-down-begin-contest': true }"></div>
+          <button class="btn btn-success mr-2" @click="handleWatchRankTable">
+            Xem BXH
+          </button>
           <button
-            v-if="isBegin"
+            v-show="contestItem.status === 'chua lam'"
             class="btn btn-primary"
             @click="handleStartContest"
           >
             Bắt đầu
           </button>
+          <button
+            v-show="contestItem.status === 'dang lam'"
+            class="btn btn-info"
+            @click="handleContinueContest"
+          >
+            Tiếp tục
+          </button>
+          <button
+            disabled
+            v-show="contestItem.status === 'da ket thuc'"
+            class="btn btn-secondary"
+          >
+            Đã hoàn thành
+          </button>
         </div>
+        <!-- <div class="f2">
+          <div :class="{ 'count-down-begin-contest': true }"></div>
+          <button
+            v-if="contestItem.status === 'da lam'"
+            class="btn btn-info"
+            @click="handleContinueContest"
+          >
+            Tiếp tục
+          </button>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { createNamespacedHelpers } from "vuex";
+const contestStore = createNamespacedHelpers("contest");
+// const authStore = createNamespacedHelpers("auth");
 export default {
   data() {
     return {
-      isBegin: false,
+      contestStatus: -1,
+      enterContestId: "",
     };
   },
+  computed: {},
   methods: {
-    handleStartContest() {
-      this.$router.push(`/contests/${this.contestItem.id}`);
+    ...contestStore.mapActions({
+      enterContestAction: "enterContestAction",
+      getContestStatusAction: "getContestStatusAction",
+    }),
+    async handleStartContest() {
+      let enterContestInfo = await this.enterContestAction({
+        participationId: this.contestItem.participationId,
+        startTime: new Date(),
+      });
+      this.enterContestId = enterContestInfo.data.id;
+      this.$router.push(`/enter-contest/${this.enterContestId}`);
+    },
+    handleContinueContest() {
+      this.$router.push(`/enter-contest/${this.contestItem.enterContestId}`);
+    },
+    handleWatchRankTable() {
+      this.$router.push(`/contest/contest-rank/${this.contestItem.id}`);
     },
     getOpenContestTime() {
       return this.contestItem.openContest;
@@ -63,7 +110,7 @@ export default {
     },
   },
 
-  created() {
+  async created() {
     let x = setInterval(() => {
       let distance =
         new Date(this.contestItem.openContest) -
@@ -86,7 +133,7 @@ export default {
       if (distance < 0 && countDownElement) {
         clearInterval(x);
         countDownElement.innerHTML = "";
-        this.isBegin = true;
+        this.contestStatus = 1;
       }
       distance -= 1000;
     }, 1000);

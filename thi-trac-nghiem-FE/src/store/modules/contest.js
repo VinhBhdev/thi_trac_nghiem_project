@@ -1,5 +1,5 @@
-import { getAllContestsApi, submitContestApi } from "@/apis/contests";
-import { addContestApi } from "@/apis/admin";
+import { getAllContestsApi, submitContestApi, enterContestApi, getEndTimeOfContestApi, getContestStatusApi, getContestRankApi, getContestDetailApi } from "@/apis/contests";
+import { addContestApi, getAllContestsForAdminApi } from "@/apis/admin";
 const state = () => {
     return {
         contestsList: [],
@@ -27,8 +27,8 @@ const mutations = {
 
 }
 const actions = {
-    async getAllContestsAction(context, subjectId) {
-        const result = await getAllContestsApi(subjectId);
+    async getAllContestsAction(context, info) {
+        const result = await getAllContestsApi(info);
         console.log(">>>getAllContestsAction")
         console.log(result.data);
         context.commit("setContestsListMutation", result.data);
@@ -44,9 +44,62 @@ const actions = {
             return error.response.data.message;
         }
     },
+    async enterContestAction(context, enterContestData) {
+        try {
+            const result = await enterContestApi(enterContestData);
+            return result.data;
+        }
+        catch (error) {
+            return error.response.data.message;
+        }
+    },
     async submitContestAction(context, submitInfo) {
         try {
             const result = await submitContestApi(submitInfo);
+            return result.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
+    },
+    async getEndTimeOfContestAction(context, userAndContestInfo) {
+        try {
+            const result = await getEndTimeOfContestApi(userAndContestInfo);
+            return result.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
+    },
+    async getContestStatusAction(context, userAndContestInfo) {
+        try {
+            const result = await getContestStatusApi(userAndContestInfo);
+            return result.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
+    },
+    async getContestRankAction(context, contestId) {
+        try {
+            const result = await getContestRankApi(contestId);
+            return result.data;
+        }
+        catch (error) {
+            return error.response.data.message;
+        }
+    },
+    async getAllContestsForAdminAction(context, subjectId) {
+        try {
+            // console.log(">>>getAllContestsForAdminAction");
+            const result = await getAllContestsForAdminApi(subjectId);
+            console.log(result.data);
+            return result.data;
+        } catch (error) {
+            return error.response.data.message;
+        }
+    },
+
+    async getContestDetailAction(context, contestId) {
+        try {
+            const result = await getContestDetailApi(contestId);
             return result.data;
         } catch (error) {
             return error.response.data.message;

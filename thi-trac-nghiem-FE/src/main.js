@@ -14,6 +14,10 @@ import AddSubject from './components/AddSubject.vue'
 import AddContest from './components/AddContest.vue'
 import ManageSubjects from './components/ManageSubjects.vue'
 import UpdateSubject from './components/UpdateSubject.vue'
+import RankTable from './components/RankTable.vue'
+import UploadWordFile from './components/UploadWordFile.vue'
+import AllContestsForAdmin from './components/AllContestsForAdmin.vue'
+import UpdateContest from './components/UpdateContest.vue'
 import VueCookies from 'vue-cookies';
 
 import { createRouter, createWebHistory } from 'vue-router'
@@ -29,7 +33,8 @@ const routes = [
     { path: '/courses', component: CourseList },
     { path: '/subjects', component: SubjectsList },
     { path: '/subjects/:subjectId', component: ContestsList },
-    { path: '/contests/:contestId', component: QuestionsList },
+    // { path: '/contests/:contestId', component: QuestionsList },
+    { path: '/enter-contest/:enterContestId', component: QuestionsList },
     { path: '/signup', component: SignUp },
     { path: '/signin', component: SignIn },
     { path: '/add-questions-list', component: AddQuestionsList },
@@ -37,6 +42,10 @@ const routes = [
     { path: '/admin/add-contest', component: AddContest },
     { path: '/admin/manage-subjects', component: ManageSubjects },
     { path: '/admin/update-subjects/:subjectId', component: UpdateSubject },
+    { path: '/contest/contest-rank/:contestId', component: RankTable },
+    { path: '/upload', component: UploadWordFile },
+    { path: '/admin/all-contests-for-admin/subjects/:subjectId', component: AllContestsForAdmin },
+    { path: '/admin/update-contest/:contestId', component: UpdateContest },
 
     { path: '/error-page', component: ErrorPage },
 
